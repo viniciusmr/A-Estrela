@@ -4,10 +4,8 @@
 package br.com.vinicius;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -154,13 +152,11 @@ public class A_Estrela {
 	
 	public static boolean busca_Estrela(String cid_origem, String cid_destino) throws Exception{
 		
-		Set<Node> explorados = new HashSet<Node>();
 		SortedSet<Borda> borda = new TreeSet<Borda>();
 		
 		Node destino = cidades[Search_name(cid_destino)];
 		Node no = cidades[Search_name(cid_origem)];
 		boolean esta_na_borda;
-		boolean foi_explorado;
 		Borda estado = new Borda();
 		estado.setEstado(no);
 		estado.setCusto(0);
@@ -186,7 +182,7 @@ public class A_Estrela {
 				Reconstruct_path(estado.getEstado());
 				return true;
 			}
-			explorados.add(estado.getEstado());
+			estado.getEstado().setExplored(true);
 			
 			System.out.println("\nVizinhos de "+ estado.getEstado().getNome() + ":");
 			
@@ -196,7 +192,6 @@ public class A_Estrela {
 			while (IteradorDeVizinhos.hasNext()) {
 				
 				esta_na_borda = false;
-				foi_explorado = false;
 				
 				no=IteradorDeVizinhos.next();
 				
@@ -211,14 +206,8 @@ public class A_Estrela {
 					}
 				}
 				
-				for (Node n : explorados) {
-					if (n.getNome().equals(no.getNome())){
-						foi_explorado = true;
-						break;						
-					}
-				}
 					
-				if (!foi_explorado && !esta_na_borda){
+				if (!no.isExplored() && !esta_na_borda){
 					Borda tmp = new Borda();
 					tmp.setEstado(no);
 					tmp.setPai(estado.getEstado());					
@@ -228,14 +217,14 @@ public class A_Estrela {
 				}
 				else{
 					for (Borda e : borda) {
-						if (e.getCusto() > estado.getCusto()+no.getDist_buc()+distancia.get(estado.getEstado(), no)) break; 
-				        if ( e.getEstado() == no ) {
+				        if ( e.getEstado() == no && e.getCusto() > estado.getCusto()+no.getDist_buc()+distancia.get(estado.getEstado(), no) ) {
 				        	e.setPai(estado.getEstado());
 				        	e.setCusto(estado.getCusto()+no.getDist_buc()+distancia.get(estado.getEstado(), no));
 				        	break;
 				        }
 					}
-				}		
+				}
+				
 			}
 		}
 	}

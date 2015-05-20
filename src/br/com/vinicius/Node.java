@@ -23,12 +23,12 @@ public class Node{
 		this.vizinhos.add(vizinho);
 	}
 	
-	public boolean isExplored() {
-		return explored;
+	/*public byte getIndex() {
+		return index;
 	}
-	public void setExplored(boolean explored) {
-		this.explored = explored;
-	}
+	public void setIndex(byte index) {
+		this.index = index;
+	}*/
 	public String getNome() {
 		return nome;
 	}
@@ -38,7 +38,7 @@ public class Node{
 
 	List <Node> vizinhos = new ArrayList<Node>();
 	
-	boolean explored;
+	//byte index;
 	String nome;
 	int dist_buc;
 	

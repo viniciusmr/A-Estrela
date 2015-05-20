@@ -1,10 +1,6 @@
-/**
- * 
- */
 package br.com.vinicius;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -12,18 +8,10 @@ import java.util.TreeSet;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
-/**
- * @author Vinícius de Moraes
- *
- */
 public class A_Estrela {
 	
-	String nome;
-	
 	static Table<Node,Node,Integer> distancia = HashBasedTable.create();
-	
 	static Map<Node, Node> caminho = new HashMap<Node, Node>();
-	
 	static Node[] cidades = new Node[30];
 	
 	public static int Search_name(String nome_cidade) throws Exception{
@@ -82,7 +70,7 @@ public class A_Estrela {
 		cidades[0].setDist_buc(366);	
 		
 		cidades[1].setNome("Bucharest");
-		cidades[1].setDist_buc(0);
+		cidades[1].setDist_buc(1);
 		
 		cidades[2].setNome("Craiova");
 		cidades[2].setDist_buc(160);
@@ -141,99 +129,96 @@ public class A_Estrela {
 		
 	}
 
+	public static void disp_borda(SortedSet<Celula> borda){
+		System.out.println("------------ Borda ------------"); 
+		for (Celula e : borda) {
+			e.print();
+		}
+		System.out.println("-------------------------------\n\n\n");
+	}
 	
-	public static void Reconstruct_path(Node filho){
+	public static boolean Reconstruct_path(Node filho){
 		while (filho != null){
 			System.out.print(filho.getNome() + " <-- ");
 			filho = caminho.get(filho);
 		}
 		System.out.println();
+		return true;
 	}
 	
 	public static boolean busca_Estrela(String cid_origem, String cid_destino) throws Exception{
 		
-		SortedSet<Borda> borda = new TreeSet<Borda>();
-		
+		SortedSet<Celula> borda = new TreeSet<Celula>();
 		Node destino = cidades[Search_name(cid_destino)];
-		Node no = cidades[Search_name(cid_origem)];
-		boolean esta_na_borda;
-		Borda estado = new Borda();
-		estado.setEstado(no);
-		estado.setCusto(0);
 		
+		Celula estado_atual = new Celula();
+		estado_atual.setEstado(cidades[Search_name(cid_origem)]);
 		
+		int funcao_de_borda=0;
 		
-		borda.add(estado);
-		 
+		borda.add(estado_atual);
 		
-		while(true){
+		while(!borda.isEmpty()){
 			
-			System.out.println("------------ Borda ------------"); 
-			for (Borda e : borda) {
-				e.print();
-			}
-			System.out.println("-------------------------------\n\n\n");
+			disp_borda(borda);
 			
-			if (borda.isEmpty()) return false;
-			estado=borda.first();
-			borda.remove(estado);
-			System.out.println("\nCidade com menor função de borda: "+ estado.getEstado().getNome());
-			if (estado.getEstado() == destino) {
-				Reconstruct_path(estado.getEstado());
-				return true;
-			}
-			estado.getEstado().setExplored(true);
+			estado_atual=borda.first();
+			borda.remove(estado_atual);
 			
-			System.out.println("\nVizinhos de "+ estado.getEstado().getNome() + ":");
+			System.out.println("\nCidade com menor função de borda: "+ estado_atual.getEstado().getNome());
 			
-			Iterator<Node> IteradorDeVizinhos = estado.getEstado().vizinhos.iterator();
+			if (estado_atual.getEstado() == destino) return(Reconstruct_path(estado_atual.getEstado()));
 			
+			estado_atual.getEstado().setExplored(true);
 			
-			while (IteradorDeVizinhos.hasNext()) {
-				
-				esta_na_borda = false;
-				
-				no=IteradorDeVizinhos.next();
-				
+			//System.out.println("Distancia percorrida até aqui:" + estado_atual.getCusto());
+			//System.out.println("\nVizinhos de "+ estado_atual.getEstado().getNome() + ":");
+			
+			for (Node no : estado_atual.getEstado().vizinhos){
 				System.out.println(no.getNome());
+				//System.out.println(no.getDist_buc());
 				
+				funcao_de_borda = estado_atual.getCusto()+distancia.get(estado_atual.getEstado(), no);
 				
-
-				for (Borda e : borda) {
-					if (e.getEstado().getNome().equals(no.getNome())) {
-						esta_na_borda = true;
-						break;						
-					}
-				}
-				
-					
-				if (!no.isExplored() && !esta_na_borda){
-					Borda tmp = new Borda();
+				if (!no.isExplored() && !no.esta_na_borda(borda)){
+					//System.out.println("Não foi explorado e não está na borda:" + no.getNome());
+					Celula tmp = new Celula();
 					tmp.setEstado(no);
-					tmp.setPai(estado.getEstado());					
-					tmp.setCusto(estado.getCusto()+distancia.get(estado.getEstado(), no));
+					//System.out.println("Nó: " + no.getNome());
+					//System.out.println("Nó: " + tmp.getEstado().getNome());
+					
+					tmp.setPai(estado_atual.getEstado());
+					//System.out.println("Pai: " + estado_atual.getEstado().getNome());
+					//System.out.println("Pai: " + tmp.getPai().getNome());
+					
+					tmp.setCusto(estado_atual.getCusto()+distancia.get(estado_atual.getEstado(), no));
+					//System.out.println("Custo: " + funcao_de_borda);
+					//System.out.println("Custo: " + tmp.getCusto());
 					borda.add(tmp);
-					caminho.put(no, estado.getEstado());
+					//System.out.println(borda.add(tmp));
+					caminho.put(no, estado_atual.getEstado());
+					//disp_borda(borda);
 				}
 				else{
-					for (Borda e : borda) {
-				        if ( e.getEstado() == no && e.getCusto() > estado.getCusto()+no.getDist_buc()+distancia.get(estado.getEstado(), no) ) {
-				        	e.setPai(estado.getEstado());
-				        	e.setCusto(estado.getCusto()+no.getDist_buc()+distancia.get(estado.getEstado(), no));
+					for (Celula e : borda) {
+				        if ( e.getEstado() == no && e.getCusto() > funcao_de_borda ) {
+				        	e.setPai(estado_atual.getEstado());
+				        	e.setCusto(funcao_de_borda);
 				        	break;
 				        }
 					}
 				}
 				
+				
 			}
 		}
+		return false;
 	}
 	
 	public static void main(String[] args) throws Exception {
 		popular_cidades();
 		popular_rotas();
-		busca_Estrela("Arad","Bucharest");
-		//busca_Estrela("Timisoara","Bucharest");
+		//busca_Estrela("Arad","Bucharest");
+		busca_Estrela("Timisoara","Bucharest");
 	}
-
 }
